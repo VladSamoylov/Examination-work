@@ -3,129 +3,131 @@
 
 using namespace std;
 
-class Meal {
-private:
-	static int count;
+class ParticCompetition {
 protected:
 	string name;
-	int price;	
+	static int count;
 public:
-	Meal() { count++; this->price = (rand() % 500) + 1; this->name = "Something dish #" + to_string(count); }
-	Meal operator+(const Meal&);
-	Meal operator++(int);
+	ParticCompetition() { this->count++; this->name = "Somebody Partic of Competition #" + to_string(count); }
+	ParticCompetition(string name) { this->count++; this->name = name; }
+	void print() { cout << this->name << endl; }
+	bool operator==(const ParticCompetition&) const;
 	istream& operator<<(istream&);
-	friend ostream& operator<<(ostream&, const Meal&);
-	void Show() { cout << this->name << " " << this->price << endl; }
-	~Meal() { this->count--; }
+	friend ostream& operator<<(ostream&, const ParticCompetition&);
+	~ParticCompetition() { this->count--; }
 };
 
-class ReadyMeal : public Meal {
+int ParticCompetition::count = 0;
+
+class FootballTeam : public ParticCompetition {
 private:
-	int cooking_time;
-	bool active_menu;
+	int score_goal;
+	int seq_number;
+	string result;
+public: 
+	FootballTeam() :ParticCompetition() { this->score_goal = rand() % 10; this->seq_number = rand() % 40 + 1; this->result = to_string(rand() % 10) + to_string(rand() % 10); }
+	void print() { cout << "Name: " << this->name << " Score goals: " << this->score_goal << endl; }
+	FootballTeam operator+= (const FootballTeam&);
+	FootballTeam operator+= (const int&);
+	FootballTeam operator++(int);
+	bool operator<(const FootballTeam&);
+};
+
+class Athlete : public ParticCompetition {
+private:
+	chrono::seconds time;
+	chrono::seconds leader_time;
+	chrono::seconds lag_leader;
+	int place;
 public:
-	ReadyMeal() :Meal() { this->cooking_time = (rand() % 180) + 1; this->active_menu = true; }
-	bool operator<(const ReadyMeal&);
+	Athlete() :ParticCompetition() { this->time = chrono::seconds(rand() % 160 + 10); this->leader_time = chrono::seconds(rand() % 160 + 10); this->lag_leader = this->leader_time - this->time; this->place = (rand() % 10) + 1; }
+	void print() { cout << "Time: " << this->time << endl; }
 	istream& operator<<(istream&);
-	friend ostream& operator<<(ostream&, const ReadyMeal&);
+	friend ostream& operator<<(ostream&, const Athlete&);
 };
 
-class SemiFinProduct : public Meal {
-private:
-	chrono::year_month_day condition_life;
-	int weight;
-	string storage_conditions;
-public:
-	SemiFinProduct() :Meal() { this->condition_life = chrono::year(2024 + (rand() % 4)) / chrono::month(1 + (rand() % 12)) / chrono::day(1 + (rand() % 28)); this->weight = rand() % 100 + 1; this->storage_conditions = "Something about storage the prouct"; }
-	bool operator==(const SemiFinProduct&) const;
-};
+FootballTeam FootballTeam::operator++(int notused) {
 
-int Meal::count = 0;
+	this->score_goal++;
+	return *this;
+}
 
-Meal Meal::operator+(const Meal& obj) {
+FootballTeam FootballTeam::operator+=(const FootballTeam& obj) {
+
+	this->score_goal += obj.score_goal;
+	return *this;
+}
+
+FootballTeam FootballTeam::operator+=(const int& i) {
+
+	this->score_goal += i;
+	return *this;
+}
+
+bool FootballTeam::operator<(const FootballTeam& obj) {
+
+	if (this->score_goal < obj.score_goal) return true;
+	else return false;
+}
+
+bool ParticCompetition::operator==(const ParticCompetition& obj) const {
+
+	if (this->name == obj.name) return true;
+	else return false;
+}
+
+istream& ParticCompetition::operator<<(istream& is) {
 	
-	this->price += obj.price;
-	return *this;
-}
-
-Meal Meal::operator++(int notused) {
-
-	this->price++;
-	return *this;
-}
-
-bool ReadyMeal::operator<(const ReadyMeal& obj) {
-
-	if (this->cooking_time < obj.cooking_time) { cout << this->name << " is quicklest" << endl; return true; }
-	else { cout << obj.name << " is quicklest" << endl; return false; }
-}
-
-bool SemiFinProduct::operator==(const SemiFinProduct& obj) const {
-
-	if (this->condition_life == obj.condition_life) cout << "Condition life is equal" << endl;
-	else return false;
-	if (this->weight == obj.weight) cout << "Weight is equal" << endl;
-	else return false;
-	if (this->storage_conditions == obj.storage_conditions) cout << "Storage conditions is equal" << endl;
-	else return false;
-
-	return true;
-}
-
-istream& Meal::operator<<(istream& is) {
-
-	cout << "Enter name of meal: "; is >> this->name;
-	cout << "Enter price: "; is >> this->price;
+	cout << "Enter name: "; is >> this->name;
 	return is;
 }
 
-ostream& operator<<(ostream& os, const Meal& obj) {
+ostream& operator<<(ostream& os, const ParticCompetition& obj) {
 
-	os << obj.name << " " << obj.price << '$' << endl;
+	os << "Name: " << obj.name << endl;
 	return os;
 }
 
-istream& ReadyMeal::operator<<(istream& is) {
+istream& Athlete::operator<<(istream& is) {
 
-	cout << "Enter name of meal: "; is >> this->name;
-	cout << "Enter price: "; is >> this->price;
-	cout << "Time cooking: "; is >> this->cooking_time;
-	cout << "Active menu 1/0 : "; is >> this->active_menu;
+	int tmp = 0;
+	cout << "Enter name: "; is >> this->name;
+	cout << "Enter time of Athlete (sec): "; is >> tmp; this->time = chrono::seconds(tmp);
+	cout << "Enter time of Leader (sec): "; is >> tmp; this->leader_time = chrono::seconds(tmp);
+	this->lag_leader = this->leader_time - this->time;
 	return is;
 }
 
-ostream& operator<<(ostream& os, const ReadyMeal& obj) {
+ostream& operator<<(ostream& os, const Athlete& obj) {
 
-	os << obj.name << " " << obj.price << '$' << endl;
-	os << obj.cooking_time << " ";
-	if (obj.active_menu) cout << "isActive" << endl;
-	else cout << "NonActive" << endl;
+	os << "Name: " << obj.name << "Time: " << obj.time << "Leader time: " << obj.leader_time << "Lag: " << obj.lag_leader << endl;
 	return os;
 }
+
+
 
 int main() {
 	srand(time(0));
 
-	Meal m;
-	ReadyMeal r1, r2;
-	SemiFinProduct s1, s2;
+	FootballTeam f1, f2;
+	Athlete a1, a2;
+	
+	cout << "f1: "; f1.print();
+	cout << "f2: "; f2.print();
+	cout << "_________" << endl;
 
-	if (r1 < r2) cout << "r1 < r2" << endl;
-	cout << "___________________________" << endl;
-	if (s1 == s2) cout << "s1 equal s2" << endl;
-	else cout << "s1 not equal s2" << endl;
-	cout << "___________________________" << endl;
-	r1.Show();
-	r1++;
-	r1.Show();
-	cout << "___________________________" << endl;
-	m << cin;
-	cout << "___________________________" << endl;
-	cout << m;
-	cout << "___________________________" << endl;
-	r1 << cin;
-	cout << "___________________________" << endl;
-	cout << r1;
+	f1++;
+	cout << "f1 (after f1++): "; f1.print();
+	cout << "f2 (f2 += f1): "; f2 += f1; f2.print();
+	cout << "f1 (f1 += 3): "; f1 += 3; f1.print();
+	cout << "f1 < f2 (scores goal)? ";
+	if (f1 < f2) cout << "Yes!" << endl;
+	else cout << "False!" << endl;
+	cout << "_________" << endl;
+
+	cout << "a2: "; a2.print();
+	a2 << cin;
+	cout << a2;
 
 	return 0;
 }
